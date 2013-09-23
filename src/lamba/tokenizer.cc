@@ -4,24 +4,10 @@
 #include <cctype>
 #include <string>
 
-namespace {
-
-bool notDigit(const char ch) {
-  return !std::isdigit(ch);
-}
-
-bool isNumber(const std::string& number) {
-  return !number.empty() &&
-      number.end() == std::find_if(number.begin(),
-                                   number.end(),
-                                   notDigit);
-}
-
-} // namespace
-
 namespace lamba {
 
-Tokenizer::Tokenizer() : is_comment_(false) {
+Tokenizer::Tokenizer() {
+  clear();
 }
 
 bool Tokenizer::parse(const std::string& text) {
@@ -35,11 +21,11 @@ bool Tokenizer::parse(const std::string& text) {
 // private
 
 const Tokenizer::StringList Tokenizer::punctuators_ = {
-  "(", ")", "/)", ".", ",", "=", "|", ";"
+  "(", ")", "\\", ".", ",", "|", ":", ";"
 };
 
 const Tokenizer::StringList Tokenizer::reserved_ = {
-  "let", "type", "in"
+  "in", "is", "let", "type"
 };
 
 void Tokenizer::addToken() {
@@ -50,24 +36,21 @@ void Tokenizer::addToken() {
     type = Token::Type::ReservedWord;
   else if (isPunctuator(token_))
     type = Token::Type::Punctuator;
-  else if (isNumber(token_))
-    type = Token::Type::Number;
-  tokens_.emplace_back(token_, type, line_, position_);
+  tokens_.emplace_back(token_, type, position_);
   token_.clear();
 }
 
 void Tokenizer::checkNewLine(const char ch) {
   if (ch != '\n')
     return;
-  ++line_;
-  position_ = 0;
+  ++position_.first;
+  position_.second = 0;
 }
 
 void Tokenizer::clear() {
   token_.clear();
   tokens_.clear();
-  line_ = 0;
-  position_ = 0;
+  position_ = std::make_pair(0, 0);
   is_comment_ = false;
 }
 
@@ -96,12 +79,12 @@ void Tokenizer::processChar(const char ch) {
 
   // For now we have only one punctuator consisting of 2 characters - '/)'
   // so it's a hack just until there are punctuators of 3 or more characters.
-  const std::string possibleLambda = token_ + ch;
+  /*const std::string possibleLambda = token_ + ch;
   if (isPunctuator(possibleLambda)) {
     token_ += ch;
     addToken();
     return;
-  }
+  }*/
   
   if (isPunctuator(token_) || isPunctuator(ch))
     addToken();

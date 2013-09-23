@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 
 namespace lamba {
 
@@ -11,29 +12,24 @@ public:
   enum class Type {
     Comment,
     Identificator,
-    Number,
     Punctuator,
     ReservedWord
   };
-  typedef std::uint32_t LineNumber;
-  typedef std::uint32_t LinePosition;
+  typedef std::pair<std::uint32_t, std::uint32_t> Position;
 
   Token(const std::string& token,
         const Type type,
-        const LineNumber line,
-        const LinePosition position);
+        const Position position);
 
   std::string getToken() const { return token_; }
   Type getType() const { return type_; }
   std::string getTypeString() const;
-  LineNumber getLineNumber() const { return line_; }
-  LinePosition getLinePosition() const { return position_; }
+  Position getPosition() const { return position_; }
 
 private:
   const std::string token_;
   const Type type_;
-  const LineNumber line_;
-  const LinePosition position_;
+  const Position position_;
 }; // class Token
 
 } // namespace lamba

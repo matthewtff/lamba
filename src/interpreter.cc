@@ -1,7 +1,36 @@
+#include <algorithm>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "lamba/tokenizer.hh"
+
+void printToken (const lamba::Token& token) {
+  std::cout << token.getToken()
+            << " : "
+            << token.getTypeString()
+            << std::endl;
+}
+
+void processFile (const std::string& file_name) {
+  if (file_name.empty())
+    return;
+  std::ifstream input_file(file_name.c_str());
+  if (!input_file)
+    return;
+  std::string input;
+  std::string line;
+  while (std::getline(input_file, line)) {
+    input += line;
+    input += '\r';
+  }
+  lamba::Tokenizer tokenizer;
+  if (tokenizer.parse(input)) {
+    const auto tokens = tokenizer.getTokens();
+    std::for_each (tokens.begin(), tokens.end(), printToken);
+  }
+}
 
 void processArgument(const char* argument) {
   if (!argument)
@@ -13,7 +42,8 @@ void processArgument(const char* argument) {
     std::cout << "Available arguments:" << std::endl;
     std::cout << "  --help" << std::endl;
     std::cout << "  --version" << std::endl;
-  }
+  } else
+    processFile(arg);
 }
 
 int processArguments(int argc, char* argv[]) {
@@ -33,17 +63,14 @@ bool processExpression() {
   const bool is_empty = expression.empty();
   lamba::Tokenizer tokenizer;
   if (tokenizer.parse(expression)) {
-    for (const lamba::Token& token : tokenizer.getTokens()) {
-      std::cout << token.getToken()
-                << " : "
-                << token.getTypeString()
-                << std::endl;
-    }
+    const auto tokens = tokenizer.getTokens();
+    std::for_each (tokens.begin(), tokens.end(), printToken);
   } else {
+    const auto position = tokenizer.getPosition();
     std::cout << "Error ["
-              << tokenizer.getLine()
+              << position.first 
               << ","
-              << tokenizer.getPosition()
+              << position.second
               << "]" << std::endl;
   }
   return !is_quit && !is_empty;

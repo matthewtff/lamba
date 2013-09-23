@@ -16,8 +16,7 @@ public:
   Tokenizer();
   bool parse(const std::string& text);
   const Tokens getTokens() const { return tokens_; }
-  Token::LineNumber getLine() const { return line_; }
-  Token::LinePosition getPosition() const { return position_; }
+  Token::Position getPosition() const { return position_; }
 
 private:
   void addToken();
@@ -33,8 +32,7 @@ private:
   std::string token_;
   Tokens tokens_;
 
-  Token::LineNumber line_;
-  Token::LinePosition position_;
+  Token::Position position_;
 
   bool is_comment_;
 }; // class Tokenizer
